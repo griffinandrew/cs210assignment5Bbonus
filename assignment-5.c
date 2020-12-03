@@ -146,21 +146,22 @@ runCloseParen(Stack dataStack, Stack opStack) {
   int rc = 0;
   char *op = ((void *)0);
 
-  while
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  while(1){
+    if(Stack_is_empty(opStack)){
+      return error(EXIT_FAILURE);
+      break;
+    }
+    char* val_top = Stack_pop(opStack);
+    if(val_top == "("){
+      break;
+    }
+    else{
+      if (runOperation(val_top) != 0){
+        return error(EXIT_FAILURE);
+        break;
+      }
+    }
+  }
 
   return rc;
 
@@ -190,5 +191,25 @@ runOperation(char *op, Stack dataStack)
   int data1;
   int data2;
   int result;
+
+  data1 = Stack_pop(dataStack);
+  data2 = Stack_pop(dataStack);
+
+  if(Stack_is_Empty(dataStack)){
+    
+    return -1;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
   return 0;
 }

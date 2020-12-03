@@ -61,6 +61,13 @@ int main(int argc, char *argv[])
   int max_input = MAX_INPUT_SIZE;
   int result;
 
+  fgets(command, max_input, stdin);
+
+  if(command == NULL){
+    break;
+  }
+  process(command);
+  
 
   // PART B: See writup for details.
   // Your job is to implment the calculator taking care of all the dynamic
@@ -87,10 +94,49 @@ process(char *command, Stack dataStack, Stack opStack){
     token = strtok(((void *)0), delim);
   }
 
+  while(token != NULL){
+    if( sscanf(token, "%d", data) == 1){
+     Stack_push(dataStack, data);
+    }
+    else{
+      if( sscanf(token, "%c", operation) == ')'){
+        //runCloseParen();
+        if(runCloseParen() != 0){
+            break;
+        }
+        else {
+          if(sscanf(token, "%c", operation) == '('){
+          //if(operation == 'C'){ 
+            Stack_push(opStack,operation);
+          }
+          else{
+            while(1){
+              if(Stack_is_empty(opStack)){
+                break;
+              }
+              char* val_top = Stack_pop(opStack);
+              if(higherPriority(val_top, operation) == 1){
+                if (runOperation(val_top) != 0){
+                  break; //diont know if this exits outer or both
+                }
+              }
+              else{
+                Stack_push(opStack, val_top);
+                break;
+              }
+            
+            }
 
 
+            Stack_push(opStack, operation);
+          }
+          
+        }
 
-
+      }
+    }
+  }
+  token =strtok(NULL, delim);
   return rc;
 }
 
@@ -99,7 +145,25 @@ int
 runCloseParen(Stack dataStack, Stack opStack) {
   int rc = 0;
   char *op = ((void *)0);
+
+  while
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return rc;
+
 }
 
 int

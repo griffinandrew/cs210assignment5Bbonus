@@ -61,13 +61,15 @@ int main(int argc, char *argv[])
   int max_input = MAX_INPUT_SIZE;
   int result;
 
+
+while(1){
   fgets(command, max_input, stdin);
 
   if(command == NULL){
     break;
   }
-  process(command);
-  
+  process(command, dataStack, opStack);
+}
 
   // PART B: See writup for details.
   // Your job is to implment the calculator taking care of all the dynamic
@@ -101,7 +103,7 @@ process(char *command, Stack dataStack, Stack opStack){
     else{
       if( sscanf(token, "%c", operation) == ')'){
         //runCloseParen();
-        if(runCloseParen() != 0){
+        if(runCloseParen(dataStack, opStack) != 0){
             break;
         }
         else {
@@ -116,7 +118,7 @@ process(char *command, Stack dataStack, Stack opStack){
               }
               char* val_top = Stack_pop(opStack);
               if(higherPriority(val_top, operation) == 1){
-                if (runOperation(val_top) != 0){
+                if (runOperation(val_top, dataStack) != 0){
                   break; //diont know if this exits outer or both
                 }
               }
@@ -156,7 +158,7 @@ runCloseParen(Stack dataStack, Stack opStack) {
       break;
     }
     else{
-      if (runOperation(val_top) != 0){
+      if (runOperation(val_top, dataStack) != 0){
         return error(EXIT_FAILURE);
         break;
       }
@@ -192,24 +194,42 @@ runOperation(char *op, Stack dataStack)
   int data2;
   int result;
 
-  data1 = Stack_pop(dataStack);
-  data2 = Stack_pop(dataStack);
-
   if(Stack_is_Empty(dataStack)){
-    
+    error_msg_opMissingArgs(op);
     return -1;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-  return 0;
+  data1 = (int)Stack_pop(dataStack);
+  if(Stack_is_Empty(dataStack)){
+    error_msg_opMissingArgs(op);
+    return -1;
+  }
+  data2 = (int)Stack_pop(dataStack);
+  if(op == "+"){
+    result = data2 + data1;
+    Stack_push(dataStack, result);
+    return 0;
+  }
+  else if(op == "*"){
+    result = data2 * data1;
+    Stack_push(dataStack, result);
+    return 0;
+  }
+  else if(op == "/"){
+    if(data1 == 0){
+      error_msg_divByZero();
+      return -1;
+    }
+    result = data2 / data2;
+    Stack_push(dataStack, result);
+    return 0;
+  }
+  else if(op == "-"){
+    result = data2 - data1;
+    Stack_push(dataStack, result);  //NOTE THIS IS NOT A VOID * 
+    return 0;
+  }
+  else{
+    error_msg_badOp(op);
+    return -1;
+  }
 }

@@ -63,13 +63,48 @@ int main(int argc, char *argv[])
 
 
 while(1){
-  fgets(command, max_input, stdin);
+  fgets(command, max_input, argv);
 
   if(command == NULL){
     break;
   }
-  process(command, dataStack, opStack);
-}
+ /* if (process(command, dataStack, opStack) != 0) {
+    error_msg_badCommand(command);
+    return -1;
+  }
+  */
+  if (process(command, dataStack, opStack) == 0){
+    while(!Stack_is_empty(opStack)){
+      char* val_top = Stack_pop(opStack);
+      if (runOperation(command, dataStack) !=0){
+        Stack_push(opStack, val_top);
+        break;
+      }
+      else{
+        if(!Stack_is_empty(opStack)){
+          error_msg_opStackNotEmpty(command);
+          //break;
+        }
+        else if (!Stack_is_empty(dataStack)){
+          error_msg_missingResult(command);
+        }
+        else{
+          Stack_push(dataStack, val_top);
+          if (!Stack_is_empty(dataStack)){
+            error_msg_extraData(command);
+          }
+          else{
+            //print result
+          }
+        }
+      }
+    }
+    
+  }
+  Stack_make_empty(dataStack);
+  Stack_make_empty(opStack);
+  }
+
 
   // PART B: See writup for details.
   // Your job is to implment the calculator taking care of all the dynamic
@@ -95,7 +130,6 @@ process(char *command, Stack dataStack, Stack opStack){
   while (token != ((void *)0)) {
     token = strtok(((void *)0), delim);
   }
-
   while(token != NULL){
     if( sscanf(token, "%d", data) == 1){
      Stack_push(dataStack, data);
@@ -126,15 +160,10 @@ process(char *command, Stack dataStack, Stack opStack){
                 Stack_push(opStack, val_top);
                 break;
               }
-            
             }
-
-
             Stack_push(opStack, operation);
           }
-          
         }
-
       }
     }
   }

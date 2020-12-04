@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
 
 while(1){
-  if (fgets(command, max_input, argv) == NULL){ //what should this be
+  if (fgets(command, max_input, argv) == NULL){ //what should this be this causes seg fault 
     break;
   }
 
@@ -226,12 +226,12 @@ runOperation(char *op, Stack dataStack)
   int data2;
   int result;
 
-  if(Stack_is_Empty(dataStack)){
+  if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
   data1 = (int)Stack_pop(dataStack);
-  if(Stack_is_Empty(dataStack)){
+  if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }

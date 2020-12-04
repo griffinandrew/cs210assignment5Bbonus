@@ -63,7 +63,9 @@ int main(int argc, char *argv[])
 
 
 while(1){
-  fgets(command, max_input, argv);
+  if (fgets(command, max_input, argv) == NULL){ //what should this be
+    break;
+  }
 
   if(command == NULL){
     break;
@@ -95,6 +97,7 @@ while(1){
           }
           else{
             //print result
+            result = (int)Stack_pop(dataStack);
           }
         }
       }
@@ -235,12 +238,12 @@ runOperation(char *op, Stack dataStack)
   data2 = (int)Stack_pop(dataStack);
   if(op == "+"){
     result = data2 + data1;
-    Stack_push(dataStack, result);
+    Stack_push(dataStack, (void *)result);
     return 0;
   }
   else if(op == "*"){
     result = data2 * data1;
-    Stack_push(dataStack, result);
+    Stack_push(dataStack, (void*)result);
     return 0;
   }
   else if(op == "/"){
@@ -249,12 +252,12 @@ runOperation(char *op, Stack dataStack)
       return -1;
     }
     result = data2 / data2;
-    Stack_push(dataStack, result);
+    Stack_push(dataStack, (void*)result);
     return 0;
   }
   else if(op == "-"){
     result = data2 - data1;
-    Stack_push(dataStack, result);  //NOTE THIS IS NOT A VOID * 
+    Stack_push(dataStack, (void*)result);  //NOTE THIS IS NOT A VOID * 
     return 0;
   }
   else{

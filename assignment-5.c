@@ -70,15 +70,11 @@ command = (char*) malloc(sizeof(char));
 while(1){
 
   printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
+  //exits right here
   
   if(command == NULL){
     break;
   }
- /* if (process(command, dataStack, opStack) != 0) {
-    error_msg_badCommand(command);
-    return -1;
-  }
-  */
   if (process(command, dataStack, opStack) == 0){
     while(!Stack_is_empty(opStack)){
       char* val_top = Stack_pop(opStack);
@@ -146,39 +142,49 @@ process(char *command, Stack dataStack, Stack opStack){
   int rc = 0;
 
   char* token = strtok(command, delim);
-  while (token != ((void *)0)) {
-    token = strtok(((void *)0), delim);
-  }
-  while(token != NULL){
+ // while (token != ((void *)0)) {
+  //  token = strtok(((void *)0), delim);
+  //}
+
+
+  while(token != NULL){ //this wont exectue bc of above 
+  data = (int*)malloc(sizeof(int));
+  
     if( sscanf(token, "%d", data) == 1){
      Stack_push(dataStack, data);
+     //free(data); //do i need that
+     data = NULL;
     }
     else{
+      operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
       if(sscanf(token, "%c", operation) == 1){
         if(operation == ")"){
           if(runCloseParen(dataStack, opStack) != 0){ //QUESTION IS REALLY ABOUT GETTING NEXT
             break;
           }
-          else{
-              if(sscanf(token, "%c", operation) == 1){
+        }
+      }
+      else{
+          if(sscanf(token, "%c", operation) == 1){
                 if(operation == "("){
                   Stack_push(opStack, operation);
                   break; //not sure about this
                 }
-                else{
-                    while(1){
-                      if(Stack_is_empty(opStack)){
-                        break;
-                      }
-                      char* val_top = Stack_pop(opStack);
-                      if(higherPriority(val_top, operation) == 1){
+          }
+          else{
+              while(1){
+                  if(Stack_is_empty(opStack)){
+                    break;
+                  }
+                  char* val_top = Stack_pop(opStack);
+                  if(higherPriority(val_top, operation) == 1){
                         //is previous operator val top i think so
                         int runOp_val = runOperation(val_top, dataStack);
                         if(runOp_val != 0){
                           break;
                         }
-                      }
-                    else{
+                    }
+                  else{
                       Stack_push(opStack, val_top);
                       free(val_top);
                       val_top = NULL;
@@ -187,16 +193,19 @@ process(char *command, Stack dataStack, Stack opStack){
                 }
                 Stack_push(opStack, operation);
               }
-          }
         }
-      }   
+      }
+    free(data);
+    free(operation);
+    token =strtok(NULL, delim);
+  
     }
-    }
+    return rc;
   }
   
-  token =strtok(NULL, delim);
-  return rc;
-}
+  //token =strtok(NULL, delim);
+  //return rc;
+//}
 
 
 int

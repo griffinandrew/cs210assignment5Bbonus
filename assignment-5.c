@@ -155,53 +155,67 @@ process(char *command, Stack dataStack, Stack opStack){
      //free(data); //do i need that
      data = NULL;
     }
-    else{
+    else
+    {
       operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
-      if(sscanf(token, "%c", operation) == 1){
-        if(operation == ")"){
-          if(runCloseParen(dataStack, opStack) != 0){ //QUESTION IS REALLY ABOUT GETTING NEXT
+      if(sscanf(token, "%c", operation) == 1)
+      {
+        if(operation == ")")
+        {
+          if(runCloseParen(dataStack, opStack) != 0)
+          { //QUESTION IS REALLY ABOUT GETTING NEXT
             break;
           }
         }
       }
-      else{
-          if(sscanf(token, "%c", operation) == 1){
-                if(operation == "("){
-                  Stack_push(opStack, operation);
-                  break; //not sure about this
-                }
+      else
+      {
+        if(sscanf(token, "%c", operation) == 1)
+        {
+          if(operation == "(")
+          {
+            Stack_push(opStack, operation);
+           // break; //not sure about this
           }
-          else{
-              while(1){
-                  if(Stack_is_empty(opStack)){
-                    break;
-                  }
-                  char* val_top = Stack_pop(opStack);
-                  if(higherPriority(val_top, operation) == 1){
-                        //is previous operator val top i think so
-                        int runOp_val = runOperation(val_top, dataStack);
-                        if(runOp_val != 0){
-                          break;
-                        }
-                    }
-                  else{
-                      Stack_push(opStack, val_top);
-                      free(val_top);
-                      val_top = NULL;
-                      break;
-                    }
-                }
-                Stack_push(opStack, operation);
+        
+          else
+          {
+            while(1)
+            {
+              if(Stack_is_empty(opStack))
+              {
+                break;
               }
+              char* val_top = Stack_pop(opStack);
+              if(higherPriority(val_top, operation) == 1)
+              {
+                //is previous operator val top i think so
+                int runOp_val = runOperation(val_top, dataStack);
+                if(runOp_val != 0)
+                {
+                  break;
+                }
+              }
+              else
+              {
+                Stack_push(opStack, val_top);
+                free(val_top);
+                val_top = NULL;
+                break;
+              }
+            }
+            Stack_push(opStack, operation);
+            operation = NULL;
+          }
         }
       }
+    }
     free(data);
     free(operation);
     token =strtok(NULL, delim);
-  
-    }
-    return rc;
   }
+  return rc;
+}
   
   //token =strtok(NULL, delim);
   //return rc;

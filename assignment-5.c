@@ -86,8 +86,9 @@ while(1){
     while(!Stack_is_empty(opStack)){
       char* val_top = Stack_pop(opStack);
 
-      run_op = runOperation(command, dataStack);
+      run_op = runOperation(val_top, dataStack);
       free(val_top);
+      val_top = NULL;
       if (run_op !=0){
         Stack_push(opStack, val_top);
         break;
@@ -112,6 +113,8 @@ while(1){
           
             printf("= %d\n", result);
           }
+          free(res);
+          res = NULL;
         }
       }
     }
@@ -151,38 +154,48 @@ process(char *command, Stack dataStack, Stack opStack){
      Stack_push(dataStack, data);
     }
     else{
-      if( sscanf(token, "%c", operation) == ')'){
-        //runCloseParen();
-        if(runCloseParen(dataStack, opStack) != 0){
+
+
+      if(sscanf(token, "%c", operation) == 1){
+        if(operation == ")"){
+          if(runCloseParen(dataStack, opStack) != 0){ //QUESTION IS REALLY ABOUT GETTING NEXT
             break;
-        }
-        else {
-          if(sscanf(token, "%c", operation) == '('){
-          //if(operation == 'C'){ 
-            Stack_push(opStack,operation);
           }
           else{
-            while(1){
-              if(Stack_is_empty(opStack)){
-                break;
-              }
-              char* val_top = Stack_pop(opStack);
-              if(higherPriority(val_top, operation) == 1){
-                if (runOperation(val_top, dataStack) != 0){
-                  break; //diont know if this exits outer or both
+              if(sscanf(token, "%c", operation) == 1){
+                if(operation == "("){
+                  Stack_push(opStack,operation);
+                  break; //not sure about this
                 }
+                else{
+                    while(1){
+                      if(Stack_is_empty(opStack)){
+                        break;
+                      }
+                      char* val_top = Stack_pop(opStack);
+                      if(higherPriority(val_top, operation) == 1){
+                        //is previous operator val top i think so
+                        int runOp_val = runOperation(val_top, dataStack);
+                        if(runOp_val != 0){
+                          break;
+                        }
+                      }
+                    else{
+                      Stack_push(opStack, val_top);
+                      break;
+                      free(val_top);
+                      val_top = NULL;
+                    }
+                }
+                Stack_push(opStack, operation);
               }
-              else{
-                Stack_push(opStack, val_top);
-                break;
-              }
-            }
-            Stack_push(opStack, operation);
           }
         }
-      }
+      }   
+    }
     }
   }
+  
   token =strtok(NULL, delim);
   return rc;
 }
@@ -210,6 +223,9 @@ runCloseParen(Stack dataStack, Stack opStack) {
         break;
       }
     }
+    free(val_top);
+    val_top =NULL;
+
   }
 
   return rc;
@@ -258,7 +274,8 @@ runOperation(char *op, Stack dataStack)
   data2 = *data_2;
   if(op == "+"){
     result = data2 + data1;
-    Stack_push(dataStack, (int *)result); //how do i deal with these
+    resultp = &result;
+    Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }
   else if(op == "*"){

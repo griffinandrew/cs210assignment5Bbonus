@@ -60,12 +60,19 @@ int main(int argc, char *argv[])
   char *command = NULL;
   int max_input = MAX_INPUT_SIZE;
   int result;
+  dataStack = Stack_create();
+  opStack = Stack_create();
+  int run_op= 0;
 
+
+command = (char*) malloc(sizeof(char));
 
 while(1){
-  if (fgets(command, max_input, argv) == NULL){ //what should this be this causes seg fault 
+
+  if (fgets(command, max_input, stdin) == NULL){ //what should this be this causes seg fault 
     break;
   }
+  printf("command %p", command);
 
   if(command == NULL){
     break;
@@ -78,7 +85,10 @@ while(1){
   if (process(command, dataStack, opStack) == 0){
     while(!Stack_is_empty(opStack)){
       char* val_top = Stack_pop(opStack);
-      if (runOperation(command, dataStack) !=0){
+
+      run_op = runOperation(command, dataStack);
+      free(val_top);
+      if (run_op !=0){
         Stack_push(opStack, val_top);
         break;
       }
@@ -91,13 +101,16 @@ while(1){
           error_msg_missingResult(command);
         }
         else{
-          Stack_push(dataStack, val_top);
+          //Stack_push(dataStack, val_top); //push or pop here
+          int* res = Stack_pop(dataStack);
+          result = *res;
           if (!Stack_is_empty(dataStack)){
             error_msg_extraData(command);
           }
           else{
             //print result
-            result = (int)Stack_pop(dataStack);
+          
+            printf("= %d\n", result);
           }
         }
       }
@@ -182,7 +195,8 @@ runCloseParen(Stack dataStack, Stack opStack) {
 
   while(1){
     if(Stack_is_empty(opStack)){
-      return error(EXIT_FAILURE);
+      return -1;
+      //return error(EXIT_FAILURE);
       break;
     }
     char* val_top = Stack_pop(opStack);
@@ -191,7 +205,8 @@ runCloseParen(Stack dataStack, Stack opStack) {
     }
     else{
       if (runOperation(val_top, dataStack) != 0){
-        return error(EXIT_FAILURE);
+        return -1;
+        //return error(EXIT_FAILURE);
         break;
       }
     }
@@ -225,25 +240,31 @@ runOperation(char *op, Stack dataStack)
   int data1;
   int data2;
   int result;
+  int* data_1;
+  int* data_2;
+  int* resultp;
 
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
-  data1 = (int)Stack_pop(dataStack);
+  data_1 = Stack_pop(dataStack);
+  data1 = *data_1;
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
-  data2 = (int)Stack_pop(dataStack);
+  data_2 = Stack_pop(dataStack);
+  data2 = *data_2;
   if(op == "+"){
     result = data2 + data1;
-    Stack_push(dataStack, (void *)result);
+    Stack_push(dataStack, (int *)result); //how do i deal with these
     return 0;
   }
   else if(op == "*"){
     result = data2 * data1;
-    Stack_push(dataStack, (void*)result);
+    resultp = &result;
+    Stack_push(dataStack, resultp);
     return 0;
   }
   else if(op == "/"){
@@ -252,12 +273,14 @@ runOperation(char *op, Stack dataStack)
       return -1;
     }
     result = data2 / data2;
-    Stack_push(dataStack, (void*)result);
+    resultp = &result;
+    Stack_push(dataStack, resultp);
     return 0;
   }
   else if(op == "-"){
     result = data2 - data1;
-    Stack_push(dataStack, (void*)result);  //NOTE THIS IS NOT A VOID * 
+    resultp = &result;
+    Stack_push(dataStack, resultp);  //NOTE THIS IS NOT A VOID * 
     return 0;
   }
   else{

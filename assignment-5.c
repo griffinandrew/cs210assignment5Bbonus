@@ -69,11 +69,8 @@ command = (char*) malloc(sizeof(char));
 
 while(1){
 
-  if (fgets(command, max_input, stdin) == NULL){ //what should this be this causes seg fault 
-    break;
-  }
-  printf("command %p", command);
-
+  printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
+  
   if(command == NULL){
     break;
   }
@@ -90,7 +87,7 @@ while(1){
       free(val_top);
       val_top = NULL;
       if (run_op !=0){
-        Stack_push(opStack, val_top);
+        //Stack_push(opStack, val_top);
         break;
       }
       else{
@@ -120,9 +117,12 @@ while(1){
     }
     
   }
+}
   Stack_make_empty(dataStack);
   Stack_make_empty(opStack);
-  }
+  free(command);
+  command = NULL;
+  
 
 
   // PART B: See writup for details.
@@ -154,8 +154,6 @@ process(char *command, Stack dataStack, Stack opStack){
      Stack_push(dataStack, data);
     }
     else{
-
-
       if(sscanf(token, "%c", operation) == 1){
         if(operation == ")"){
           if(runCloseParen(dataStack, opStack) != 0){ //QUESTION IS REALLY ABOUT GETTING NEXT
@@ -164,7 +162,7 @@ process(char *command, Stack dataStack, Stack opStack){
           else{
               if(sscanf(token, "%c", operation) == 1){
                 if(operation == "("){
-                  Stack_push(opStack,operation);
+                  Stack_push(opStack, operation);
                   break; //not sure about this
                 }
                 else{
@@ -182,9 +180,9 @@ process(char *command, Stack dataStack, Stack opStack){
                       }
                     else{
                       Stack_push(opStack, val_top);
-                      break;
                       free(val_top);
                       val_top = NULL;
+                      break;
                     }
                 }
                 Stack_push(opStack, operation);
@@ -205,10 +203,14 @@ int
 runCloseParen(Stack dataStack, Stack opStack) {
   int rc = 0;
   char *op = ((void *)0);
+  int empty =0;
+  int runOp_fail =0;
+  char* val_top = NULL;
 
   while(1){
     if(Stack_is_empty(opStack)){
-      return -1;
+      empty =1;
+     // return -1;
       //return error(EXIT_FAILURE);
       break;
     }
@@ -218,16 +220,23 @@ runCloseParen(Stack dataStack, Stack opStack) {
     }
     else{
       if (runOperation(val_top, dataStack) != 0){
-        return -1;
-        //return error(EXIT_FAILURE);
+        runOp_fail = 1;
         break;
       }
     }
-    free(val_top);
-    val_top =NULL;
-
   }
 
+/*
+  if (empty == 1){
+    printf("ERROR stack empty");
+  }
+  if(runOp_fail == 1){
+    printf("ERROR runOP fail");
+  }
+  */
+
+  free(val_top);
+  val_top =NULL;
   return rc;
 
 }
@@ -266,21 +275,29 @@ runOperation(char *op, Stack dataStack)
   }
   data_1 = Stack_pop(dataStack);
   data1 = *data_1;
+  free(data_1);
+  data_1 = NULL;
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
   data_2 = Stack_pop(dataStack);
   data2 = *data_2;
+  free(data_2);
+  data_2 = NULL;
   if(op == "+"){
     result = data2 + data1;
-    resultp = &result;
+    *resultp = result;
+    free(resultp);
+    resultp =NULL;
     Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }
   else if(op == "*"){
     result = data2 * data1;
-    resultp = &result;
+    *resultp = result;
+    free(resultp);
+    resultp =NULL;
     Stack_push(dataStack, resultp);
     return 0;
   }
@@ -290,14 +307,18 @@ runOperation(char *op, Stack dataStack)
       return -1;
     }
     result = data2 / data2;
-    resultp = &result;
+    *resultp = result;
     Stack_push(dataStack, resultp);
+    free(resultp);
+    resultp =NULL;
     return 0;
   }
   else if(op == "-"){
     result = data2 - data1;
-    resultp = &result;
+    *resultp = result;
     Stack_push(dataStack, resultp);  //NOTE THIS IS NOT A VOID * 
+    free(resultp);
+    resultp =NULL;
     return 0;
   }
   else{

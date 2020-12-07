@@ -288,7 +288,7 @@ runOperation(char *op, Stack dataStack)
   int result;
   int* data_1;
   int* data_2;
-  int* resultp = &result; //changed this
+  int* resultp; // = &result; //changed this
  // int oper;
 
   //oper = (int)*op;
@@ -310,11 +310,12 @@ runOperation(char *op, Stack dataStack)
   free(data_2);
   data_2 = NULL;
   if(strcmp(op,"+") ==0){
-    result = data2 + data1;
-    *resultp = result;
+    result = data2 + data1; //not pushing result onto the stack
+    *resultp = result; //something is up here
     Stack_push(dataStack, resultp); //how do i deal with these
-    free(resultp); //saying freeing invalid pointer here why invalid? 
+   // free(resultp); //saying freeing invalid pointer here why invalid? 
     resultp = NULL;
+    free(resultp);
     //Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }

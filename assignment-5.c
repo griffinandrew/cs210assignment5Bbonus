@@ -91,7 +91,7 @@ while(1){
           error_msg_opStackNotEmpty(command);
           //break;
         }
-        else if (!Stack_is_empty(dataStack)){
+        else if (Stack_is_empty(dataStack)){
           error_msg_missingResult(command);
         }
         else{
@@ -106,7 +106,7 @@ while(1){
           
             printf("= %d\n", result);
           }
-          free(res);
+          free(res); //excpetion occurs here
           res = NULL;
         }
       }
@@ -311,11 +311,12 @@ runOperation(char *op, Stack dataStack)
   data_2 = NULL;
   if(strcmp(op,"+") ==0){
     result = data2 + data1; //not pushing result onto the stack
-    *resultp = result; //something is up here
+    //resultp = &result;
+    *resultp = result; //something is up here sefg fault why tho its becuase im like dereferencing a null pointer maybe I need to alloc mem for it
     Stack_push(dataStack, resultp); //how do i deal with these
-   // free(resultp); //saying freeing invalid pointer here why invalid? 
+    free(resultp); //saying freeing invalid pointer here why invalid? 
     resultp = NULL;
-    free(resultp);
+   // free(resultp);
     //Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }

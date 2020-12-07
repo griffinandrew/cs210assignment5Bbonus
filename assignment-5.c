@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   command = (char*) malloc(sizeof(char));
 
   while(1){
-
+      //now i get a seg fault here wtf
     printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
     //exits right here
     
@@ -93,12 +93,12 @@ int main(int argc, char *argv[])
           }
           else{
             int* res = Stack_pop(dataStack);
-            result = *res;
+            //result = *res;
             if (!Stack_is_empty(dataStack)){
               error_msg_extraData(command);
             }
             else{
-              printf("= %d\n", result);
+              printf("= %d\n", *res);
             }
             free(res); //excpetion occurs here
             res = NULL;
@@ -106,9 +106,13 @@ int main(int argc, char *argv[])
         }
       }
     }
+    Stack_make_empty(dataStack); //not sure about this location
+    Stack_make_empty(opStack);
+    //free(command);
+    //command = NULL;
   }
-  Stack_make_empty(dataStack);
-  Stack_make_empty(opStack);
+ // Stack_make_empty(dataStack);
+  //Stack_make_empty(opStack);
   free(command);
   command = NULL;
   return 0;
@@ -170,6 +174,7 @@ process(char *command, Stack dataStack, Stack opStack){
                   break;
                 }
                 char* val_top = Stack_pop(opStack);
+                printf("%c, val_top");
                 if(higherPriority(val_top, operation) == 1)
                 {
                   //is previous operator val top i think so
@@ -187,7 +192,7 @@ process(char *command, Stack dataStack, Stack opStack){
                   break;
                 }
               }
-              Stack_push(opStack, operation);
+              Stack_push(opStack, operation); //this push is causing seg fault bc push is reallocing memory for op again
               operation = NULL;
             }
           }

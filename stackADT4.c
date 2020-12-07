@@ -90,7 +90,8 @@ bool Stack_is_full(Stack s){
 
 //this function allocates space for a new node to be added to the stack if it does have suffcient space 
 //the given data is assigned to the node and the new node is added to the front of the list
-void Stack_push(Stack s, void *i){
+void Stack_push(Stack s, void *i){ 
+    //seg fault is happening when allocating memory for new node
     struct node *new_node = malloc(sizeof(struct node)); //allocate space for the node to be pushed
     if(new_node == NULL){
         terminate("error new node is NULL\n"); //if malloc returns null error occured

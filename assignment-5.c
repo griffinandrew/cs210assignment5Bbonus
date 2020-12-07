@@ -65,65 +65,52 @@ int main(int argc, char *argv[])
   int run_op= 0;
 
 
-command = (char*) malloc(sizeof(char));
+  command = (char*) malloc(sizeof(char));
 
-while(1){
+  while(1){
 
-  printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
-  //exits right here
-  
-  if(command == NULL){
-    break;
-  }
-  if (process(command, dataStack, opStack) == 0){
-    while(!Stack_is_empty(opStack)){
-      char* val_top = Stack_pop(opStack);
-
-      run_op = runOperation(val_top, dataStack);
-      free(val_top);
-      val_top = NULL;
-      if (run_op !=0){
-        //Stack_push(opStack, val_top);
-        break;
-      }
-      else{
-        if(!Stack_is_empty(opStack)){
-          error_msg_opStackNotEmpty(command);
-          //break;
-        }
-        else if (Stack_is_empty(dataStack)){
-          error_msg_missingResult(command);
+    printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
+    //exits right here
+    
+    if(command == NULL){
+      break;
+    }
+    if (process(command, dataStack, opStack) == 0){
+      while(!Stack_is_empty(opStack)){
+        char* val_top = Stack_pop(opStack);
+        run_op = runOperation(val_top, dataStack);
+        free(val_top);
+        val_top = NULL;
+        if (run_op !=0){
+          break;
         }
         else{
-          //Stack_push(dataStack, val_top); //push or pop here
-          int* res = Stack_pop(dataStack);
-          result = *res;
-          if (!Stack_is_empty(dataStack)){
-            error_msg_extraData(command);
+          if(!Stack_is_empty(opStack)){
+            error_msg_opStackNotEmpty(command);
+          }
+          else if (Stack_is_empty(dataStack)){
+            error_msg_missingResult(command);
           }
           else{
-            //print result
-          
-            printf("= %d\n", result);
+            int* res = Stack_pop(dataStack);
+            result = *res;
+            if (!Stack_is_empty(dataStack)){
+              error_msg_extraData(command);
+            }
+            else{
+              printf("= %d\n", result);
+            }
+            free(res); //excpetion occurs here
+            res = NULL;
           }
-          free(res); //excpetion occurs here
-          res = NULL;
         }
       }
     }
-    
   }
-}
   Stack_make_empty(dataStack);
   Stack_make_empty(opStack);
   free(command);
   command = NULL;
-  
-
-
-  // PART B: See writup for details.
-  // Your job is to implment the calculator taking care of all the dynamic
-  // memory management using the stack module you implmented in Part A
   return 0;
 }
 
@@ -285,13 +272,15 @@ runOperation(char *op, Stack dataStack)
 {
   int data1;
   int data2;
-  int result;
+  int result =0;
   int* data_1;
   int* data_2;
-  int* resultp; // = &result; //changed this
+  //int* resultp; // = &result; //changed this
  // int oper;
 
   //oper = (int)*op;
+
+  int* resultp = (int*)malloc(sizeof(int));
 
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
@@ -351,6 +340,8 @@ runOperation(char *op, Stack dataStack)
   }
   else{
     error_msg_badOp(op);
+    free(resultp);
+    resultp = NULL;
     return -1;
   }
 }

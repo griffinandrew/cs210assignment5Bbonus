@@ -146,17 +146,15 @@ process(char *command, Stack dataStack, Stack opStack){
   //  token = strtok(((void *)0), delim);
   //}
 
-
   while(token != NULL){ //this wont exectue bc of above 
-  data = (int*)malloc(sizeof(int));
+    data = (int*)malloc(sizeof(int));
   
     if( sscanf(token, "%d", data) == 1){
      Stack_push(dataStack, data);
      //free(data); //do i need that
      data = NULL;
     }
-    else
-    {
+    else{
       operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
       if(sscanf(token, "%c", operation) == 1)
       {
@@ -167,52 +165,52 @@ process(char *command, Stack dataStack, Stack opStack){
             break;
           }
         }
-      }
-      else
-      {
-        if(sscanf(token, "%c", operation) == 1)
-        {
-          if(operation == "(")
+        else //wont ever enter this loop why?
+        { 
+          if(sscanf(token, "%c", operation) == 1)
           {
-            Stack_push(opStack, operation);
-           // break; //not sure about this
-          }
-        
-          else
-          {
-            while(1)
+            if(operation == "(")
             {
-              if(Stack_is_empty(opStack))
+              Stack_push(opStack, operation);
+            // break; //not sure about this
+            }
+            else //doesn't go into this loop
+            {
+              while(1) //wont go into this loop
               {
-                break;
-              }
-              char* val_top = Stack_pop(opStack);
-              if(higherPriority(val_top, operation) == 1)
-              {
-                //is previous operator val top i think so
-                int runOp_val = runOperation(val_top, dataStack);
-                if(runOp_val != 0)
+                if(Stack_is_empty(opStack))
                 {
                   break;
                 }
+                char* val_top = Stack_pop(opStack);
+                if(higherPriority(val_top, operation) == 1)
+                {
+                  //is previous operator val top i think so
+                  int runOp_val = runOperation(val_top, dataStack);
+                  if(runOp_val != 0)
+                  {
+                    break;
+                  }
+                }
+                else
+                {
+                  Stack_push(opStack, val_top);
+                  free(val_top);
+                  val_top = NULL;
+                  break;
+                }
               }
-              else
-              {
-                Stack_push(opStack, val_top);
-                free(val_top);
-                val_top = NULL;
-                break;
-              }
+              Stack_push(opStack, operation);
+              operation = NULL;
             }
-            Stack_push(opStack, operation);
-            operation = NULL;
           }
         }
+     // free(operation);
       }
     }
     free(data);
-    free(operation);
-    token =strtok(NULL, delim);
+    free(operation); //this causes error must be double freeing or something here
+    token =strtok(NULL, delim); //now error occurs here why? 
   }
   return rc;
 }
@@ -259,7 +257,7 @@ runCloseParen(Stack dataStack, Stack opStack) {
   */
 
   free(val_top);
-  val_top =NULL;
+  val_top = NULL;
   return rc;
 
 }
@@ -291,6 +289,9 @@ runOperation(char *op, Stack dataStack)
   int* data_1;
   int* data_2;
   int* resultp;
+ // int oper;
+
+  //oper = (int)*op;
 
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
@@ -308,7 +309,7 @@ runOperation(char *op, Stack dataStack)
   data2 = *data_2;
   free(data_2);
   data_2 = NULL;
-  if(op == "+"){
+  if(strcmp(op,"+") ==0){
     result = data2 + data1;
     *resultp = result;
     free(resultp);
@@ -316,7 +317,7 @@ runOperation(char *op, Stack dataStack)
     Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }
-  else if(op == "*"){
+  else if(strcmp(op,"*") ==0){
     result = data2 * data1;
     *resultp = result;
     free(resultp);
@@ -324,7 +325,7 @@ runOperation(char *op, Stack dataStack)
     Stack_push(dataStack, resultp);
     return 0;
   }
-  else if(op == "/"){
+  else if(strcmp(op,"/") ==0){
     if(data1 == 0){
       error_msg_divByZero();
       return -1;
@@ -336,7 +337,7 @@ runOperation(char *op, Stack dataStack)
     resultp =NULL;
     return 0;
   }
-  else if(op == "-"){
+  else if(strcmp(op,"-") ==0){
     result = data2 - data1;
     *resultp = result;
     Stack_push(dataStack, resultp);  //NOTE THIS IS NOT A VOID * 

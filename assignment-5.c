@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     if(command == NULL){
       break;
     }
-    if (process(command, dataStack, opStack) == 0){
+    if (process(command, dataStack, opStack) == 0){ //happening in process
       while(!Stack_is_empty(opStack)){
         char* val_top = Stack_pop(opStack);
         run_op = runOperation(val_top, dataStack);
@@ -92,13 +92,13 @@ int main(int argc, char *argv[])
             error_msg_missingResult(command);
           }
           else{
-            int* res = Stack_pop(dataStack);
+            int* res = Stack_pop(dataStack); //res is  memory address
             //result = *res;
             if (!Stack_is_empty(dataStack)){
               error_msg_extraData(command);
             }
             else{
-              printf("= %d\n", *res);
+              printf("= %d\n", res);
             }
             free(res); //excpetion occurs here
             res = NULL;
@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
 int
 process(char *command, Stack dataStack, Stack opStack){
   char delim[] = " ";
-  int *data = ((void *)0);
-  char *operation = ((void *)0);
+  int *data = NULL;
+  char *operation = NULL;
   int rc = 0;
 
   char* token = strtok(command, delim);
@@ -137,19 +137,32 @@ process(char *command, Stack dataStack, Stack opStack){
   //  token = strtok(((void *)0), delim);
   //}
 
-  while(token != NULL){ //this wont exectue bc of above 
+  while(token != NULL)
+  { //this wont exectue bc of above 
+  assert(data == NULL && operation == NULL);
     data = (int*)malloc(sizeof(int));
-  
-    if( sscanf(token, "%d", data) == 1){
-     Stack_push(dataStack, data);
+   // data = NULL;
+    //operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
+    if( sscanf(token, "%d", data) == 1)
+    {
+      printf("data val, %d\n", *data);
+      Stack_push(dataStack, data);
      //free(data); //do i need that
-     data = NULL;
+      data = NULL;
+     //break; //added this
     }
-    else{
+    else
+    {
       operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
-      if(sscanf(token, "%c", operation) == 1)
+      //operation = NULL;
+      //printf("op val %s", operation);
+      if(sscanf(token, "%s", operation) == 1)
       {
-        if(operation == ")")
+        printf("op val %s", operation);
+        if (operation == NULL){
+          printf("op is null");
+        }
+        if(!strcmp(operation,")"))
         {
           if(runCloseParen(dataStack, opStack) != 0)
           { //QUESTION IS REALLY ABOUT GETTING NEXT
@@ -158,11 +171,12 @@ process(char *command, Stack dataStack, Stack opStack){
         }
         else //wont ever enter this loop why?
         { 
-          if(sscanf(token, "%c", operation) == 1)
-          {
-            if(operation == "(")
+          //if(sscanf(token, "%s", operation) == 1)
+          //{
+            if(!strcmp(operation,"("))
             {
               Stack_push(opStack, operation);
+              operation = NULL;
             // break; //not sure about this
             }
             else //doesn't go into this loop
@@ -174,36 +188,66 @@ process(char *command, Stack dataStack, Stack opStack){
                   break;
                 }
                 char* val_top = Stack_pop(opStack);
-                printf("%c, val_top");
-                if(higherPriority(val_top, operation) == 1)
+                printf("val at top %s", val_top);
+                if(higherPriority(val_top, operation))
                 {
                   //is previous operator val top i think so
                   int runOp_val = runOperation(val_top, dataStack);
                   if(runOp_val != 0)
                   {
+                    free(val_top);
+                    val_top = NULL;
                     break;
                   }
+                  free(val_top);
+                  val_top = NULL;
                 }
                 else
                 {
                   Stack_push(opStack, val_top);
-                  free(val_top);
-                  val_top = NULL;
+                 // free(val_top);
+                 // val_top = NULL;
                   break;
                 }
               }
+              //puah the operation is still cauing the fault gooooddddddddd
+              printf("op val %s", operation);
               Stack_push(opStack, operation); //this push is causing seg fault bc push is reallocing memory for op again
+              //free(operation);
               operation = NULL;
             }
-          }
+            //Stack_push(opStack, operation); //this push is causing seg fault bc push is reallocing memory for op again
+              //free(operation);
+             // operation = NULL;
+          //}
         }
      // free(operation);
       }
     }
-    free(data);
-    free(operation); //this causes error must be double freeing or something here
-    token =strtok(NULL, delim); //now error occurs here why? 
+    //printf("op val %s", operation);
+    //printf("data val, %d\n", *data);
+    if (data){
+      printf("data val at end %d\n", *data);
+      free(data);
+      data = NULL;
+    }
+    if(operation){
+      printf("op val %s at end", operation);
+      free(operation); //this causes error must be double freeing or something here
+      operation = NULL;
+    }
+
+  token = strtok(NULL, delim);
+   // free(data);
+   // data = NULL;
+   // free(operation); //this causes error must be double freeing or something here
+  //  operation = NULL;
   }
+  //free(data);
+  //data = NULL;
+ // free(operation); //this causes error must be double freeing or something here
+ // operation = NULL;
+  //token =strtok(NULL, delim); //now error occurs here why? 
   return rc;
 }
   
@@ -215,7 +259,7 @@ process(char *command, Stack dataStack, Stack opStack){
 int
 runCloseParen(Stack dataStack, Stack opStack) {
   int rc = 0;
-  char *op = ((void *)0);
+  char *op = NULL;
   int empty =0;
   int runOp_fail =0;
   char* val_top = NULL;
@@ -228,7 +272,7 @@ runCloseParen(Stack dataStack, Stack opStack) {
       break;
     }
     char* val_top = Stack_pop(opStack);
-    if(val_top == "("){
+    if(strcmp(val_top,"(") == 1){
       break;
     }
     else{
@@ -251,7 +295,6 @@ runCloseParen(Stack dataStack, Stack opStack) {
   free(val_top);
   val_top = NULL;
   return rc;
-
 }
 
 int
@@ -307,6 +350,7 @@ runOperation(char *op, Stack dataStack)
     result = data2 + data1; //not pushing result onto the stack
     //resultp = &result;
     *resultp = result; //something is up here sefg fault why tho its becuase im like dereferencing a null pointer maybe I need to alloc mem for it
+    printf("%p", resultp);
     Stack_push(dataStack, resultp); //how do i deal with these
     free(resultp); //saying freeing invalid pointer here why invalid? 
     resultp = NULL;

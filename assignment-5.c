@@ -338,52 +338,56 @@ higherPriority(char *oldOp, char *newOp)
 int
 runOperation(char *op, Stack dataStack)
 {
-  int data1;
-  int data2;
-  int result =0;
-  int* data_1;
-  int* data_2;
+  int* data1;
+  int* data2;
+  int* result;
+ // int* data_1;
+ // int* data_2;
   //int* resultp; // = &result; //changed this
  // int oper;
 
   //oper = (int)*op;
 
-  int* resultp = (int*)malloc(sizeof(int));
+  result = (int*)malloc(sizeof(int));
 
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
-  data_1 = Stack_pop(dataStack);
-  data1 = *data_1;
-  free(data_1);
-  data_1 = NULL;
+  data1 = Stack_pop(dataStack);
+  //data1 = *data_1;
+  //free(data1);
+ // data1 = NULL;
   if(Stack_is_empty(dataStack)){
     error_msg_opMissingArgs(op);
     return -1;
   }
-  data_2 = Stack_pop(dataStack);
-  data2 = *data_2;
-  free(data_2);
-  data_2 = NULL;
+  data2 = Stack_pop(dataStack);
+  //data2 = *data_2;
+  //free(data2);
+  //data2 = NULL;
   if(strcmp(op,"+") ==0){
-    result = data2 + data1; //not pushing result onto the stack
+    *result = *data2 + *data1; //not pushing result onto the stack
     //resultp = &result;
-    *resultp = result; //something is up here sefg fault why tho its becuase im like dereferencing a null pointer maybe I need to alloc mem for it
-    printf("result in runOp %p", *resultp);
-    Stack_push(dataStack, resultp); //how do i deal with these
-    free(resultp); //saying freeing invalid pointer here why invalid? 
-    resultp = NULL;
+    //*resultp = result; //something is up here sefg fault why tho its becuase im like dereferencing a null pointer maybe I need to alloc mem for it
+    printf("result in runOp %p", *result);
+    Stack_push(dataStack, result); //how do i deal with these
+    free(result); //saying freeing invalid pointer here why invalid? 
+    result = NULL;
    // free(resultp);
     //Stack_push(dataStack, resultp); //how do i deal with these
     return 0;
   }
   else if(strcmp(op,"*") ==0){
-    result = data2 * data1;
-    *resultp = result;
-    Stack_push(dataStack, resultp);
-    free(resultp);
-    resultp = NULL;
+    *result = *data2 * *data1;
+   // *resultp = result;
+    Stack_push(dataStack, result);
+    free(result);
+    result = NULL;
+    free(data1);
+    data1 = NULL;
+    free(data2);
+    data2 = NULL;
     //Stack_push(dataStack, resultp);
     return 0;
   }
@@ -392,25 +396,37 @@ runOperation(char *op, Stack dataStack)
       error_msg_divByZero();
       return -1;
     }
-    result = data2 / data2;
-    *resultp = result;
-    Stack_push(dataStack, resultp);
-    free(resultp);
-    resultp = NULL;
+    *result = *data2 / *data2;
+    //*resultp = result;
+    Stack_push(dataStack, result);
+    free(result);
+    result = NULL;
+    free(data1);
+    data1 = NULL;
+    free(data2);
+    data2 = NULL;
     return 0;
   }
   else if(strcmp(op,"-") ==0){
-    result = data2 - data1;
-    *resultp = result;
-    Stack_push(dataStack, resultp);  //NOTE THIS IS NOT A VOID * 
-    free(resultp);
-    resultp = NULL;
+    *result = *data2 - *data1;
+    //*resultp = result;
+    Stack_push(dataStack, result);  //NOTE THIS IS NOT A VOID * 
+    free(result);
+    result = NULL;
+    free(data1);
+    data1 = NULL;
+    free(data2);
+    data2 = NULL;
     return 0;
   }
   else{
     error_msg_badOp(op);
-    free(resultp);
-    resultp = NULL;
+    free(result);
+    result = NULL;
+    free(data1);
+    data1 = NULL;
+    free(data2);
+    data2 = NULL;
     return -1;
   }
 }

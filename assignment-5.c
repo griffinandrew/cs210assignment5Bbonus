@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
   command = (char*) malloc(sizeof(char));
 
-  while(1){ //need for control i think
+  while(j++ < 1){ //need for control i think
       //now i get a seg fault here wtf
     printf("%s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
     //exits right here
@@ -103,13 +103,13 @@ int main(int argc, char *argv[])
               //printf("= %d\n", &res);
               //printf("= %d\n", res);
             }
-            //free(res); //excpetion occurs here
-            //res = NULL;
+            free(res); //excpetion occurs here
+            res = NULL;
           }
         } //end of if op ==0
       }
-    //Stack_make_empty(dataStack); //not sure about this location not 100 SURE ABOUT THIS
-    //Stack_make_empty(opStack);
+    Stack_make_empty(dataStack); //not sure about this location not 100 SURE ABOUT THIS
+    Stack_make_empty(opStack);
     }
     //Stack_make_empty(dataStack); //not sure about this location
     //Stack_make_empty(opStack);
@@ -354,6 +354,7 @@ runOperation(char *op, Stack dataStack)
   //printf("result at beginning of run op %d", result);
 
   if(Stack_is_empty(dataStack)){
+    printf("data1 is empty");
     error_msg_opMissingArgs(op);
     return -1;
   }
@@ -363,6 +364,7 @@ runOperation(char *op, Stack dataStack)
   //free(data1);
  // data1 = NULL;
   if(Stack_is_empty(dataStack)){
+    printf("data2 is empty");
     error_msg_opMissingArgs(op);
     return -1;
   }
@@ -380,8 +382,10 @@ runOperation(char *op, Stack dataStack)
     Stack_push(dataStack, result); //how do i deal with these
    // free(result); //saying freeing invalid pointer here why invalid? 
     result = NULL;
-   // free(resultp);
-    //Stack_push(dataStack, resultp); //how do i deal with these
+    free(data1);
+    data1 = NULL;
+    free(data2);
+    data2 = NULL;
     return 0;
   }
   else if(strcmp(op,"*") ==0){
@@ -399,10 +403,16 @@ runOperation(char *op, Stack dataStack)
   }
   else if(strcmp(op,"/") ==0){
     if(*data1 == 0){
+      free(data1);
+      data1 = NULL;
+      free(data2);
+      data2 = NULL;
+      free(result);
+      result = NULL;
       error_msg_divByZero();
       return -1;
     }
-    *result = *data2 / *data2;
+    *result = *data2 / *data1;
     //*resultp = result;
     Stack_push(dataStack, result);
     //free(result);

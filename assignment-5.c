@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
               error_msg_extraData(command);
             }
             else{
-              printf("= %d\n", res);
+              printf("= %d\n", *res);
             }
             free(res); //excpetion occurs here
             res = NULL;
@@ -136,10 +136,12 @@ process(char *command, Stack dataStack, Stack opStack){
  // while (token != ((void *)0)) {
   //  token = strtok(((void *)0), delim);
   //}
-
+  printf("data val at beg %d\n", data);
+  printf("op val at beg %s\n", operation);
+  printf("command at beg %s\n", command);
   while(token != NULL)
   { //this wont exectue bc of above 
-  assert(data == NULL && operation == NULL);
+    assert(data == NULL && operation == NULL);
     data = (int*)malloc(sizeof(int));
    // data = NULL;
     //operation = (char*)malloc(sizeof(char) * MAX_OP_SIZE);
@@ -159,21 +161,22 @@ process(char *command, Stack dataStack, Stack opStack){
       if(sscanf(token, "%s", operation) == 1)
       {
         printf("op val %s", operation);
-        if (operation == NULL){
-          printf("op is null");
-        }
+       // if (operation == NULL){
+       //   printf("op is null");
+       // }
         if(!strcmp(operation,")"))
         {
-          if(runCloseParen(dataStack, opStack) != 0)
+          rc= runCloseParen(dataStack, opStack);
+          if(rc < 0)
           { //QUESTION IS REALLY ABOUT GETTING NEXT
             break;
           }
         }
-        else //wont ever enter this loop why?
-        { 
+        //else //wont ever enter this loop why?
+        //{ 
           //if(sscanf(token, "%s", operation) == 1)
           //{
-            if(!strcmp(operation,"("))
+            else if(!strcmp(operation,"("))
             {
               Stack_push(opStack, operation);
               operation = NULL;
@@ -192,15 +195,17 @@ process(char *command, Stack dataStack, Stack opStack){
                 if(higherPriority(val_top, operation))
                 {
                   //is previous operator val top i think so
-                  int runOp_val = runOperation(val_top, dataStack);
-                  if(runOp_val != 0)
-                  {
-                    free(val_top);
-                    val_top = NULL;
-                    break;
-                  }
+                  rc = runOperation(val_top, dataStack);
                   free(val_top);
                   val_top = NULL;
+                  if(rc < 0)
+                  {
+                    //free(val_top);
+                   // val_top = NULL;
+                    goto done;
+                  }
+                  //free(val_top);
+                  //val_top = NULL;
                 }
                 else
                 {
@@ -220,9 +225,10 @@ process(char *command, Stack dataStack, Stack opStack){
               //free(operation);
              // operation = NULL;
           //}
-        }
+        //}
      // free(operation);
       }
+      //operation = NULL; //.newly aDDED 
     }
     //printf("op val %s", operation);
     //printf("data val, %d\n", *data);
@@ -244,10 +250,20 @@ process(char *command, Stack dataStack, Stack opStack){
   //  operation = NULL;
   }
   //free(data);
-  //data = NULL;
+  data = NULL;
  // free(operation); //this causes error must be double freeing or something here
- // operation = NULL;
+  operation = NULL;
   //token =strtok(NULL, delim); //now error occurs here why? 
+  done:
+  if(data != NULL){
+    free(data);
+    data = NULL;
+  }
+  if(operation != NULL){
+    free(operation);
+    operation = NULL;
+  }
+
   return rc;
 }
   

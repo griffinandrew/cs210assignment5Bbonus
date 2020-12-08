@@ -63,28 +63,29 @@ int main(int argc, char *argv[])
   dataStack = Stack_create();
   opStack = Stack_create();
   int run_op= 0;
+  int j =0;
 
 
   command = (char*) malloc(sizeof(char));
 
-  while(1){
+  while(j++ < 1){ //need for control i think
       //now i get a seg fault here wtf
-    printf("enter %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
+    printf("enter number: %s", fgets(command, max_input, stdin)); //what should this be this causes seg fault 
     //exits right here
-    
     if(command == NULL){
       break;
     }
     if (process(command, dataStack, opStack) == 0){ //happening in process
       while(!Stack_is_empty(opStack)){
-        char* val_top = Stack_pop(opStack);
+        char *val_top = Stack_pop(opStack);
         run_op = runOperation(val_top, dataStack);
         free(val_top);
         val_top = NULL;
-        if (run_op !=0){
+        if (run_op == -1){
           break;
         }
-        else{
+      }
+      if(run_op == 0){
           if(!Stack_is_empty(opStack)){
             error_msg_opStackNotEmpty(command);
           }
@@ -92,26 +93,30 @@ int main(int argc, char *argv[])
             error_msg_missingResult(command);
           }
           else{
-            int* res = Stack_pop(dataStack); //res is  memory address
-            //result = *res;
+            int *res = Stack_pop(dataStack); //res is  memory address
+            result = *res;
             if (!Stack_is_empty(dataStack)){
               error_msg_extraData(command);
             }
             else{
-              printf("= %d\n", *res);
+              printf("= %d\n", result);
             }
             free(res); //excpetion occurs here
             res = NULL;
           }
-        }
+        } //end of if op ==0
       }
-    }
     Stack_make_empty(dataStack); //not sure about this location
     Stack_make_empty(opStack);
+    }
+    //Stack_make_empty(dataStack); //not sure about this location
+    //Stack_make_empty(opStack);
     //free(command);
     //command = NULL;
-  }
+ //}
  // Stack_make_empty(dataStack);
+  Stack_destroy(dataStack);
+  Stack_destroy(opStack);
   //Stack_make_empty(opStack);
   free(command);
   command = NULL;
@@ -242,17 +247,16 @@ process(char *command, Stack dataStack, Stack opStack){
       free(operation); //this causes error must be double freeing or something here
       operation = NULL;
     }
-
-  token = strtok(NULL, delim);
+    token = strtok(NULL, delim);
    // free(data);
    // data = NULL;
    // free(operation); //this causes error must be double freeing or something here
   //  operation = NULL;
   }
   //free(data);
-  data = NULL;
+ // data = NULL;
  // free(operation); //this causes error must be double freeing or something here
-  operation = NULL;
+ // operation = NULL;
   //token =strtok(NULL, delim); //now error occurs here why? 
   done:
   if(data != NULL){
@@ -366,7 +370,7 @@ runOperation(char *op, Stack dataStack)
     result = data2 + data1; //not pushing result onto the stack
     //resultp = &result;
     *resultp = result; //something is up here sefg fault why tho its becuase im like dereferencing a null pointer maybe I need to alloc mem for it
-    printf("%p", resultp);
+    printf("result in runOp %p", *resultp);
     Stack_push(dataStack, resultp); //how do i deal with these
     free(resultp); //saying freeing invalid pointer here why invalid? 
     resultp = NULL;

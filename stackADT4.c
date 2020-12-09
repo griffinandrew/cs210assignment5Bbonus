@@ -48,7 +48,6 @@ bool Stack_is_empty(Stack s){
     return s->top == NULL; //is the top of the stack is null there are no entries in the stack
 }
 
-
 //this fucntion returns the data from the element at the top of stack if it is empty it terminates otherwise
 //the data is copied from the old top then the new top is set to next, the old top is freed and then set to null to avoid memory leaks
 //the data from the old top is returned
@@ -87,12 +86,9 @@ bool Stack_is_full(Stack s){
     return false; //stack is never full bc we are using a linked list 
 }
 
-
 //this function allocates space for a new node to be added to the stack if it does have suffcient space 
 //the given data is assigned to the node and the new node is added to the front of the list
 void Stack_push(Stack s, void *i){ 
-    //seg fault is happening when allocating memory for new node
-   // printf("what is being pushed %d", i);
     struct node *new_node = malloc(sizeof(struct node)); //allocate space for the node to be pushed
     if(new_node == NULL){
         terminate("error new node is NULL\n"); //if malloc returns null error occured
